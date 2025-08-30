@@ -17,10 +17,6 @@ export type { UseCountdownTimerOptions, UseCountdownTimerReturn } from './hooks/
 export { usePlaceholderCandle, calculateCandleTime } from './hooks/usePlaceholderCandle';
 export type { UsePlaceholderCandleOptions, UsePlaceholderCandleReturn } from './hooks/usePlaceholderCandle';
 
-export { useChartSessionPersistence } from './hooks/useChartSessionPersistence';
-export { useInitialChartState } from './hooks/useInitialChartState';
-export type { ChartSession, MarketCandle } from './hooks/useInitialChartState';
-
 // Services
 export { ChartDataCoordinator, chartDataCoordinator } from './services/ChartDataCoordinator';
 export type { SymbolMetadata } from './services/ChartDataCoordinator';
