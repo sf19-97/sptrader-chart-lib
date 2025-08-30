@@ -1,0 +1,54 @@
+{
+  "name": "@sptrader/chart-lib",
+  "version": "1.0.0",
+  "description": "Beautiful financial charts with smooth transitions and auto-timeframe switching",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint src --ext .ts,.tsx",
+    "type-check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "dependencies": {
+    "@mantine/core": "^7.5.0",
+    "@tauri-apps/api": "^2.0.0",
+    "lightweight-charts": "^4.1.0",
+    "lodash": "^4.17.21",
+    "xstate": "^5.8.0",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.202",
+    "@types/node": "^24.3.0",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "keywords": [
+    "charts",
+    "financial",
+    "trading",
+    "candlestick",
+    "lightweight-charts",
+    "react"
+  ],
+  "author": "Sebastian",
+  "license": "MIT"
+}
