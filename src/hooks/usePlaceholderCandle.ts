@@ -1,5 +1,6 @@
 import { useRef, useCallback } from 'react';
 import { ISeriesApi, CandlestickData, Time } from 'lightweight-charts';
+import { TIMEFRAME_SECONDS } from '../constants/timeframes';
 
 export interface UsePlaceholderCandleOptions {
   onPlaceholderCreated?: (time: number) => void;
@@ -154,14 +155,6 @@ export function usePlaceholderCandle(
  * Helper function to calculate candle time for a given timeframe
  */
 export function calculateCandleTime(timestamp: number, timeframe: string): number {
-  const periods: Record<string, number> = {
-    '5m': 300,
-    '15m': 900,
-    '1h': 3600,
-    '4h': 14400,
-    '12h': 43200,
-  };
-  
-  const period = periods[timeframe] || 3600;
+  const period = TIMEFRAME_SECONDS[timeframe as keyof typeof TIMEFRAME_SECONDS] || TIMEFRAME_SECONDS['1h'];
   return Math.floor(timestamp / period) * period;
 }

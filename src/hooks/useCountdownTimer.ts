@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { TIMEFRAME_SECONDS } from '../constants/timeframes';
 
 export interface UseCountdownTimerOptions {
   onNewCandleBoundary?: (time: number) => void;
@@ -174,15 +175,7 @@ export function useCountdownTimer(
 export function getNextCandleTime(timeframe: string): number {
   const now = Math.floor(Date.now() / 1000);
   
-  const periods: Record<string, number> = {
-    '5m': 300,
-    '15m': 900,
-    '1h': 3600,
-    '4h': 14400,
-    '12h': 43200,
-  };
-  
-  const period = periods[timeframe] || 3600;
+  const period = TIMEFRAME_SECONDS[timeframe as keyof typeof TIMEFRAME_SECONDS] || TIMEFRAME_SECONDS['1h'];
   return Math.ceil(now / period) * period;
 }
 
@@ -192,14 +185,6 @@ export function getNextCandleTime(timeframe: string): number {
 export function getCurrentCandleTime(timeframe: string): number {
   const now = Math.floor(Date.now() / 1000);
   
-  const periods: Record<string, number> = {
-    '5m': 300,
-    '15m': 900,
-    '1h': 3600,
-    '4h': 14400,
-    '12h': 43200,
-  };
-  
-  const period = periods[timeframe] || 3600;
+  const period = TIMEFRAME_SECONDS[timeframe as keyof typeof TIMEFRAME_SECONDS] || TIMEFRAME_SECONDS['1h'];
   return Math.floor(now / period) * period;
 }

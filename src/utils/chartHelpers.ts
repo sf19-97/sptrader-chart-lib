@@ -1,4 +1,5 @@
 import { IChartApi, ISeriesApi, Time } from 'lightweight-charts';
+import { getTimeframePeriodSeconds } from '../constants/timeframes';
 
 /**
  * Calculate the appropriate bar spacing when switching timeframes
@@ -152,23 +153,6 @@ export function createPlaceholderCandle(
   };
 }
 
-/**
- * Get the period duration in seconds for a timeframe
- */
-export function getTimeframePeriodSeconds(timeframe: string): number {
-  switch (timeframe) {
-    case '5m':
-      return 5 * 60;
-    case '15m':
-      return 15 * 60;
-    case '1h':
-      return 60 * 60;
-    case '4h':
-      return 4 * 60 * 60;
-    case '12h':
-      return 12 * 60 * 60;
-    default:
-      return 60 * 60; // Default to 1 hour
-  }
-}
+// Re-export from constants for backward compatibility
+export { getTimeframePeriodSeconds } from '../constants/timeframes';
 
