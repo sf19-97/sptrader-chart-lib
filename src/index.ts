@@ -30,6 +30,9 @@ export * from './utils/chartHelpers';
 // Types
 export * from './types';
 
+// Pages
+export { MarketChartPage } from './pages';
+
 // State Machine (optional)
 export { chartMachine, useChartMachine } from './machines/chartStateMachine';
 export type { ChartContext, ChartEvent, ChartState } from './machines/chartStateMachine';

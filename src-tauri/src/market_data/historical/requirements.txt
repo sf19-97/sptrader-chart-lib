@@ -1,0 +1,7 @@
+# Requirements for catchup_ingester.py
+requests>=2.31.0
+pandas>=2.0.0
+psutil>=5.9.0
+sqlalchemy>=2.0.0
+urllib3>=2.0.0
+# Note: lzma is part of Python standard library (no install needed)

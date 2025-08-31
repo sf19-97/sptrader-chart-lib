@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from './tauriWrapper';
 
 interface ChartData {
   time: number;
@@ -187,33 +187,31 @@ export class ChartDataCoordinator {
     to: number
   ): Promise<{ data: ChartData[]; metadata: SymbolMetadata | null }> {
     try {
-      const response = await invoke<any>('get_market_candles', {
-        symbol,
-        timeframe,
-        from,
-        to
+      const response = await invoke<any>('fetch_candles', {
+        request: {
+          symbol,
+          timeframe,
+          from,
+          to
+        }
       });
 
-      if (!response.data || !Array.isArray(response.data)) {
+      if (!response || !Array.isArray(response)) {
         console.error('[ChartDataCoordinator] Invalid response format:', response);
         return { data: [], metadata: null };
       }
 
-      // Convert string prices to numbers and parse time
-      const data = response.data.map((candle: any) => ({
-        time: Math.floor(new Date(candle.time).getTime() / 1000), // Convert ISO string to Unix timestamp
-        open: parseFloat(candle.open),
-        high: parseFloat(candle.high),
-        low: parseFloat(candle.low),
-        close: parseFloat(candle.close),
+      // The backend returns candles with time as Unix timestamp
+      const data = response.map((candle: any) => ({
+        time: candle.time, // Already Unix timestamp from backend
+        open: candle.open,
+        high: candle.high,
+        low: candle.low,
+        close: candle.close,
       }));
 
-      // Extract metadata from response
-      const metadata = response.metadata ? {
-        data_from: response.metadata.start_timestamp,
-        data_to: response.metadata.end_timestamp,
-        total_ticks: response.metadata.total_ticks
-      } : null;
+      // For now, we don't have metadata from this endpoint
+      const metadata = null;
 
       return { data, metadata };
     } catch (error) {

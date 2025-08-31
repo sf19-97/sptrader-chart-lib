@@ -10,9 +10,8 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { createChart, IChartApi, ISeriesApi, CandlestickSeries } from 'lightweight-charts';
-import { invoke } from '@tauri-apps/api/core';
-import { listen } from '@tauri-apps/api/event';
+import { createChart, IChartApi, ISeriesApi } from 'lightweight-charts';
+import { invoke, listen } from '../services/tauriWrapper';
 import { useChartStore } from '../stores/useChartStore';
 import { Box } from '@mantine/core';
 import { chartDataCoordinator, type SymbolMetadata } from '../services/ChartDataCoordinator';
@@ -215,7 +214,7 @@ const MarketDataChart: React.FC<MarketDataChartProps> = ({
     setChartOpacity(0.2);
 
     // Wait for fade out
-    await new Promise((resolve) => setTimeout(resolve, 250));
+    await new Promise((resolve) => setTimeout(resolve, 300));
 
     try {
       // Let coordinator use its default range for this timeframe
@@ -439,7 +438,7 @@ const MarketDataChart: React.FC<MarketDataChartProps> = ({
       },
     });
 
-    const candlestickSeries = chart.addSeries(CandlestickSeries, {
+    const candlestickSeries = chart.addCandlestickSeries({
       upColor: '#00ff88',
       downColor: '#ff4976',
       borderVisible: false,
@@ -915,7 +914,7 @@ const MarketDataChart: React.FC<MarketDataChartProps> = ({
 
     let nextTarget = targets.find((t) => t > currentSecond);
     if (!nextTarget) {
-      nextTarget = targets[0] + 60; // Wrap to next minute
+      nextTarget = targets[0]! + 60; // Wrap to next minute - targets is always defined
     }
 
     let delaySeconds = nextTarget - currentSecond;
@@ -948,7 +947,7 @@ const MarketDataChart: React.FC<MarketDataChartProps> = ({
                 // Merge new data with existing data
                 if (currentData.length > 0 && data.length > 0) {
                   // Find the overlap point
-                  const firstNewTime = data[0].time;
+                  const firstNewTime = data[0]!.time; // data.length > 0 ensures this exists
                   const existingIndex = currentData.findIndex(
                     (c) => (c.time as number) >= firstNewTime
                   );
