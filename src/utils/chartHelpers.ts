@@ -172,21 +172,3 @@ export function getTimeframePeriodSeconds(timeframe: string): number {
   }
 }
 
-/**
- * Format seconds into MM:SS format
- */
-export function formatCountdown(seconds: number): string {
-  const minutes = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-}
-
-/**
- * Get countdown color based on time remaining
- */
-export function getCountdownColor(secondsRemaining: number): string {
-  if (secondsRemaining <= 3) return '#ff4444';
-  if (secondsRemaining <= 10) return '#ff8844';
-  if (secondsRemaining <= 30) return '#ffaa44';
-  return '#999';
-}
