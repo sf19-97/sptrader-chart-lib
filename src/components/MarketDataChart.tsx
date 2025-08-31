@@ -17,7 +17,7 @@ import { Box } from '@mantine/core';
 import { chartDataCoordinator, type SymbolMetadata } from '../services/ChartDataCoordinator';
 import { CountdownTimer } from './CountdownTimer';
 import { usePlaceholderCandle, calculateCandleTime } from '../hooks/usePlaceholderCandle';
-import { getDaysToShowForTimeframe, setVisibleRangeByDays } from '../utils/chartHelpers';
+import { getDaysToShowForTimeframe, setVisibleRangeByDays, calculateBarSpacingForTimeframeSwitch } from '../utils/chartHelpers';
 
 interface ChartData {
   time: number; // Unix timestamp
@@ -172,8 +172,10 @@ const MarketDataChart: React.FC<MarketDataChartProps> = ({
       `[ResolutionTracker] Executing transition: ${previousTimeframe} → ${newTimeframe} at bar spacing ${currentBarSpacing}`
     );
 
-    // Update state
+    // Update ref immediately to prevent stale closures
     currentTimeframeRef.current = newTimeframe;
+    
+    // Update state
     setCurrentTimeframe(newTimeframe);
     setStoreTimeframe(newTimeframe);
     if (onTimeframeChange) {
@@ -211,80 +213,42 @@ const MarketDataChart: React.FC<MarketDataChartProps> = ({
       }
 
       if (data.length > 0 && seriesRef.current && chartRef.current) {
-        // Calculate new bar spacing
-        let newBarSpacing = currentBarSpacing;
-
-        if (newTimeframe === '5m' && previousTimeframe === '15m') {
-          newBarSpacing = Math.max(3, currentBarSpacing / 3);
-        } else if (newTimeframe === '15m' && previousTimeframe === '5m') {
-          newBarSpacing = Math.min(50, currentBarSpacing * 3);
-        } else if (newTimeframe === '15m' && previousTimeframe === '1h') {
-          newBarSpacing = Math.max(3, currentBarSpacing / 4);
-        } else if (newTimeframe === '1h' && previousTimeframe === '15m') {
-          newBarSpacing = Math.min(50, currentBarSpacing * 4);
-        } else if (newTimeframe === '1h' && previousTimeframe === '4h') {
-          newBarSpacing = Math.max(3, currentBarSpacing / 4);
-        } else if (newTimeframe === '4h' && previousTimeframe === '1h') {
-          newBarSpacing = Math.min(50, currentBarSpacing * 4);
-        } else if (newTimeframe === '4h' && previousTimeframe === '12h') {
-          newBarSpacing = Math.max(3, currentBarSpacing / 3);
-        } else if (newTimeframe === '12h' && previousTimeframe === '4h') {
-          newBarSpacing = Math.min(50, currentBarSpacing * 3);
-        }
+        // Calculate new bar spacing using the helper function
+        const newBarSpacing = calculateBarSpacingForTimeframeSwitch(
+          currentBarSpacing,
+          previousTimeframe,
+          newTimeframe
+        );
 
         // Apply bar spacing before setting data
         chartRef.current.timeScale().applyOptions({
           barSpacing: newBarSpacing,
         });
 
-        // Wait for next animation frame to ensure display surface is ready
-        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-        
         // Update data - use setData directly for timeframe switches
         console.log(`[switchTimeframe] Setting ${data.length} candles on series`);
+        
+        // Apply the new data
         seriesRef.current.setData(data as any);
+        
         console.log(`[switchTimeframe] Data set complete`);
+        console.log(`[switchTimeframe] Updated currentTimeframeRef.current to: ${currentTimeframeRef.current}`);
 
-        // Maintain view range
-        if (visibleRange) {
-          if (isShiftPressed && lockedLeftEdgeRef.current !== null) {
-            // Keep left edge locked
-            const currentDuration = (visibleRange.to as number) - (visibleRange.from as number);
-            const ratio =
-              newTimeframe === previousTimeframe
-                ? 1
-                : newTimeframe === '5m' && previousTimeframe === '15m'
-                      ? 3
-                      : newTimeframe === '15m' && previousTimeframe === '5m'
-                        ? 0.33
-                        : newTimeframe === '15m' && previousTimeframe === '1h'
-                          ? 4
-                          : newTimeframe === '1h' && previousTimeframe === '15m'
-                            ? 0.25
-                            : newTimeframe === '1h' && previousTimeframe === '4h'
-                              ? 4
-                              : newTimeframe === '4h' && previousTimeframe === '1h'
-                                ? 0.25
-                                : newTimeframe === '4h' && previousTimeframe === '12h'
-                                  ? 3
-                                  : newTimeframe === '12h' && previousTimeframe === '4h'
-                                    ? 0.33
-                                    : 1;
-
-            const newDuration = currentDuration / ratio;
-            const newTo = lockedLeftEdgeRef.current + newDuration;
-
-            chartRef.current.timeScale().setVisibleRange({
-              from: lockedLeftEdgeRef.current as any,
-              to: newTo as any,
-            });
-          } else {
-            // Normal behavior
-            chartRef.current.timeScale().setVisibleRange({
-              from: visibleRange.from as any,
-              to: visibleRange.to as any,
-            });
-          }
+        // Maintain view range - MUST set the same time range
+        if (visibleRange && chartRef.current) {
+          // Force the chart to show the exact same time period
+          console.log(`[switchTimeframe] Restoring visible range: ${new Date((visibleRange.from as number) * 1000).toISOString()} to ${new Date((visibleRange.to as number) * 1000).toISOString()}`);
+          
+          // Apply the same visible range immediately
+          chartRef.current.timeScale().setVisibleRange({
+            from: visibleRange.from,
+            to: visibleRange.to,
+          });
+          
+          // Also ensure the bar spacing is maintained
+          chartRef.current.timeScale().applyOptions({
+            barSpacing: newBarSpacing,
+          });
         }
       }
 
