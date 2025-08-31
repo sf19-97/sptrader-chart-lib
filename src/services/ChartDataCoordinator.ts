@@ -187,7 +187,7 @@ export class ChartDataCoordinator {
     to: number
   ): Promise<{ data: ChartData[]; metadata: SymbolMetadata | null }> {
     try {
-      const response = await invoke<any>('fetch_candles', {
+      const response = await invoke('fetch_candles', {
         request: {
           symbol,
           timeframe,
@@ -240,7 +240,7 @@ export class ChartDataCoordinator {
     
     // If no cached metadata, make a separate request
     try {
-      const response = await invoke<any>('get_symbol_metadata', { symbol });
+      const response = await invoke('get_symbol_metadata', { symbol });
       return response;
     } catch (error) {
       console.error('[ChartDataCoordinator] Failed to get metadata:', error);

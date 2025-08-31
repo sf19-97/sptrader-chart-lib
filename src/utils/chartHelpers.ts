@@ -112,14 +112,20 @@ export function findLastRealCandle(series: ISeriesApi<'Candlestick'>): any | nul
   // Placeholders typically have all OHLC values the same
   for (let i = data.length - 1; i >= 0; i--) {
     const candle = data[i];
-    if (candle.open !== candle.high || 
-        candle.open !== candle.low || 
-        candle.open !== candle.close) {
-      return candle;
+    if (!candle) continue;
+    
+    // Check if it's a candlestick data (not whitespace)
+    if ('open' in candle && 'high' in candle && 'low' in candle && 'close' in candle) {
+      if (candle.open !== candle.high || 
+          candle.open !== candle.low || 
+          candle.open !== candle.close) {
+        return candle;
+      }
     }
   }
   
-  return data[data.length - 1];
+  const lastCandle = data[data.length - 1];
+  return lastCandle && 'close' in lastCandle ? lastCandle : null;
 }
 
 /**
@@ -134,12 +140,15 @@ export function createPlaceholderCandle(
   const periodSeconds = getTimeframePeriodSeconds(timeframe);
   const candleTime = Math.floor(currentTime / periodSeconds) * periodSeconds;
   
+  // Use the last candle's close price, or a default if not available
+  const price = lastCandle?.close ?? lastCandle?.open ?? 0;
+  
   return {
     time: candleTime,
-    open: lastCandle.close,
-    high: lastCandle.close,
-    low: lastCandle.close,
-    close: lastCandle.close,
+    open: price,
+    high: price,
+    low: price,
+    close: price,
   };
 }
 

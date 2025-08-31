@@ -125,11 +125,14 @@ export const useChartStore = create<ChartState>()(
 
         // Simple LRU: if cache is too big, remove oldest
         if (newCache.size >= 100) {
-          const oldestKey = Array.from(newCache.entries()).sort(
+          const entries = Array.from(newCache.entries()).sort(
             (a, b) => a[1].timestamp - b[1].timestamp
-          )[0][0];
-          newCache.delete(oldestKey);
-          console.log('[ChartStore] Cache eviction, removed:', oldestKey);
+          );
+          if (entries.length > 0 && entries[0]) {
+            const oldestKey = entries[0][0];
+            newCache.delete(oldestKey);
+            console.log('[ChartStore] Cache eviction, removed:', oldestKey);
+          }
         }
 
         newCache.set(key, {

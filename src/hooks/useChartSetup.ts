@@ -6,7 +6,6 @@ import {
   ChartOptions,
   DeepPartial,
   CandlestickSeriesOptions,
-  CandlestickSeries,
 } from 'lightweight-charts';
 
 export interface ChartTheme {
@@ -154,7 +153,7 @@ export function useChartSetup(
     });
 
     // Add candlestick series with merged options
-    const series = chart.addSeries(CandlestickSeries, {
+    const series = chart.addCandlestickSeries({
       ...defaultSeriesOptions(theme),
       ...seriesOptions,
     });

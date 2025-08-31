@@ -26,11 +26,20 @@ const generateBaseTicks = (from: number, to: number) => {
   return ticks;
 };
 
+// Align time to candle boundary
+const alignToCandleBoundary = (timestamp: number, interval: number): number => {
+  return Math.floor(timestamp / interval) * interval;
+};
+
 // Aggregate ticks into candles
 const aggregateCandles = (ticks: any[], interval: number, from: number, to: number) => {
   const candles = [];
   
-  for (let candleTime = from; candleTime <= to - interval; candleTime += interval) {
+  // Start from the first aligned candle that contains or is after 'from'
+  const alignedStart = alignToCandleBoundary(from, interval);
+  const alignedEnd = alignToCandleBoundary(to + interval, interval); // Include partial candle at end
+  
+  for (let candleTime = alignedStart; candleTime < alignedEnd; candleTime += interval) {
     const candleTicks = ticks.filter(t => 
       t.time >= candleTime && t.time < candleTime + interval
     );
@@ -42,14 +51,17 @@ const aggregateCandles = (ticks: any[], interval: number, from: number, to: numb
       const low = Math.min(...candleTicks.map(t => t.price));
       const volume = candleTicks.reduce((sum, t) => sum + t.volume, 0);
       
-      candles.push({
-        time: candleTime,
-        open,
-        high,
-        low,
-        close,
-        volume
-      });
+      // Only include candles that are within our requested range
+      if (candleTime >= from && candleTime <= to) {
+        candles.push({
+          time: candleTime,
+          open,
+          high,
+          low,
+          close,
+          volume
+        });
+      }
     }
   }
   

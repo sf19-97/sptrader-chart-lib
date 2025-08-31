@@ -31,18 +31,8 @@ interface MarketDataChartProps {
   symbol?: string;
   timeframe?: string;
   onTimeframeChange?: (timeframe: string) => void;
-  isFullscreen?: boolean;
-  onToggleFullscreen?: () => void;
 }
 
-
-interface MarketTick {
-  timestamp: string;
-  symbol: string;
-  bid: number;
-  ask: number;
-  last?: number;
-}
 
 interface StreamStatus {
   connected: boolean;
@@ -53,8 +43,6 @@ const MarketDataChart: React.FC<MarketDataChartProps> = ({
   symbol,
   timeframe,
   onTimeframeChange,
-  isFullscreen = false,
-  onToggleFullscreen,
 }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
@@ -65,14 +53,13 @@ const MarketDataChart: React.FC<MarketDataChartProps> = ({
   const symbolRef = useRef(symbol || 'EURUSD');
   const [isLoading, setIsLoading] = useState(false);
   const isTransitioningRef = useRef(false);
-  const [chartOpacity, setChartOpacity] = useState(1);
 
   // Real-time streaming state
-  const [streamStatus, setStreamStatus] = useState<StreamStatus>({
-    connected: false,
-    message: 'Not connected',
-  });
-  const [lastTick, setLastTick] = useState<MarketTick | null>(null);
+  // TODO: Display connection status in UI
+  // const [streamStatus, setStreamStatus] = useState<StreamStatus>({
+  //   connected: false,
+  //   message: 'Not connected',
+  // });
 
 
   // Zustand store
@@ -122,23 +109,6 @@ const MarketDataChart: React.FC<MarketDataChartProps> = ({
     return `$${price.toFixed(2)}`;
   };
 
-  // Get timeframe duration in seconds
-  const getTimeframeSeconds = (timeframe: string): number => {
-    switch (timeframe) {
-      case '5m':
-        return 5 * 60;
-      case '15m':
-        return 15 * 60;
-      case '1h':
-        return 60 * 60;
-      case '4h':
-        return 4 * 60 * 60;
-      case '12h':
-        return 12 * 60 * 60;
-      default:
-        return 60 * 60; // Default to 1h
-    }
-  };
 
 
 
@@ -210,11 +180,9 @@ const MarketDataChart: React.FC<MarketDataChartProps> = ({
       onTimeframeChange(newTimeframe);
     }
 
-    // Start fade out
-    setChartOpacity(0.2);
-
-    // Wait for fade out
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    // Skip fade effect to prevent flashing
+    // setChartOpacity(0.2);
+    // await new Promise((resolve) => setTimeout(resolve, 300));
 
     try {
       // Let coordinator use its default range for this timeframe
@@ -237,7 +205,7 @@ const MarketDataChart: React.FC<MarketDataChartProps> = ({
         setCurrentTimeframe(previousTimeframe);
         setStoreTimeframe(previousTimeframe);
         // Fade back in
-        setChartOpacity(1);
+        // setChartOpacity(1);
         isTransitioningRef.current = false;
         return;
       }
@@ -321,7 +289,7 @@ const MarketDataChart: React.FC<MarketDataChartProps> = ({
       }
 
       // Fade back in
-      setChartOpacity(1);
+      // setChartOpacity(1);
       console.log(`[switchTimeframe] Transition complete to ${newTimeframe}`);
     } catch (error) {
       console.error('[switchTimeframe] Failed to switch timeframe:', error);
@@ -329,7 +297,7 @@ const MarketDataChart: React.FC<MarketDataChartProps> = ({
       currentTimeframeRef.current = previousTimeframe;
       setCurrentTimeframe(previousTimeframe);
       setStoreTimeframe(previousTimeframe);
-      setChartOpacity(1);
+      // setChartOpacity(1);
     } finally {
       console.log(`[switchTimeframe] Setting isTransitioningRef to false`);
       isTransitioningRef.current = false;
@@ -376,7 +344,7 @@ const MarketDataChart: React.FC<MarketDataChartProps> = ({
         minBarSpacing: 2, // Prevent excessive zoom out
         rightOffset: 5, // Small margin on the right
         rightBarStaysOnScroll: true, // Keep the latest bar in view when scrolling
-        tickMarkFormatter: (time: number, tickMarkType: number, locale: string) => {
+        tickMarkFormatter: (time: number, tickMarkType: number) => {
           // Convert UTC timestamp to local time for axis labels
           const date = new Date(time * 1000);
 
@@ -877,13 +845,15 @@ const MarketDataChart: React.FC<MarketDataChartProps> = ({
         unlistenStatus = await listen<StreamStatus>('market-stream-status', (event) => {
           if (!mounted) return;
           console.log('[MarketDataChart] Stream status:', event.payload);
-          setStreamStatus(event.payload);
+          // TODO: Display connection status in UI
+          // setStreamStatus(event.payload);
         });
       } catch (error) {
         console.error('[MarketDataChart] Failed to start market stream:', error);
-        if (mounted) {
-          setStreamStatus({ connected: false, message: `Error: ${error}` });
-        }
+        // TODO: Display error in UI
+        // if (mounted) {
+        //   setStreamStatus({ connected: false, message: `Error: ${error}` });
+        // }
       }
     };
 
@@ -1034,8 +1004,8 @@ const MarketDataChart: React.FC<MarketDataChartProps> = ({
           height: '100%',
           background: '#0a0a0a',
           position: 'relative',
-          opacity: chartOpacity,
-          transition: 'opacity 300ms ease-in-out',
+          opacity: 1, // Always full opacity to prevent flashing
+          // transition: 'opacity 300ms ease-in-out',
         }}
       >
         {isLoading && (

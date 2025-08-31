@@ -51,9 +51,9 @@ export function usePlaceholderCandle(
 
     const lastCandle = currentData[currentData.length - 1];
     
-    // Type guard - only process if it's actual candle data
-    if (!('close' in lastCandle)) {
-      console.log('[usePlaceholderCandle] Last data point is not a candle');
+    // Check if lastCandle exists and is actual candle data
+    if (!lastCandle || !('close' in lastCandle)) {
+      console.log('[usePlaceholderCandle] Last data point is not a valid candle');
       return;
     }
     
