@@ -104,28 +104,3 @@ export function useAutoTimeframeSwitch(
   };
 }
 
-/**
- * Get the appropriate bar spacing when switching between timeframes
- * Helps maintain visual continuity
- */
-export function getBarSpacingForTimeframeSwitch(
-  currentSpacing: number,
-  fromTimeframe: string,
-  toTimeframe: string
-): number {
-  const multipliers: Record<string, number> = {
-    '5m->15m': 3,
-    '15m->5m': 1/3,
-    '15m->1h': 4,
-    '1h->15m': 1/4,
-    '1h->4h': 4,
-    '4h->1h': 1/4,
-    '4h->12h': 3,
-    '12h->4h': 1/3,
-  };
-
-  const key = `${fromTimeframe}->${toTimeframe}`;
-  const multiplier = multipliers[key] || 1;
-  
-  return Math.max(3, Math.min(50, currentSpacing * multiplier));
-}
