@@ -10,7 +10,6 @@ export { useChartZoom } from './hooks/useChartZoom';
 export type { VisibleRange, UseChartZoomOptions, UseChartZoomReturn } from './hooks/useChartZoom';
 
 export { useChartData } from './hooks/useChartData';
-export { useAutoTimeframeSwitch } from './hooks/useAutoTimeframeSwitch';
 export { useCountdownTimer, getNextCandleTime, getCurrentCandleTime } from './hooks/useCountdownTimer';
 export type { UseCountdownTimerOptions, UseCountdownTimerReturn } from './hooks/useCountdownTimer';
 
