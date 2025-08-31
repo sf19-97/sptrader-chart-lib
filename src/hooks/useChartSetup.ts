@@ -42,7 +42,7 @@ export const defaultChartOptions = (theme: ChartTheme): DeepPartial<ChartOptions
     horzLines: { color: theme.gridColor },
   },
   crosshair: {
-    mode: 1, // Magnet mode
+    mode: 0, // Normal mode - free mouse movement
     vertLine: {
       color: theme.gridColor,
       width: 1,
