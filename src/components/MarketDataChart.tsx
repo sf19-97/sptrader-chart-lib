@@ -18,6 +18,7 @@ import { chartDataCoordinator, type SymbolMetadata } from '../services/ChartData
 import { CountdownTimer } from './CountdownTimer';
 import { usePlaceholderCandle, calculateCandleTime } from '../hooks/usePlaceholderCandle';
 import { getDaysToShowForTimeframe, setVisibleRangeByDays, calculateBarSpacingForTimeframeSwitch } from '../utils/chartHelpers';
+import { TIMEFRAME_SWITCH_THRESHOLDS } from '../constants/timeframes';
 
 interface ChartData {
   time: number; // Unix timestamp
@@ -90,16 +91,6 @@ const MarketDataChart: React.FC<MarketDataChartProps> = ({
 
   // Track if initial load has been done
   const initialLoadDoneRef = useRef(false);
-
-  // CRITICAL: Use bar spacing thresholds, not pixel widths
-  const SWITCH_TO_5M_BAR_SPACING = 35; // When 15m bars are spread this wide, switch to 5m
-  const SWITCH_TO_15M_BAR_SPACING = 32; // When 1h bars are spread this wide, switch to 15m
-  const SWITCH_FROM_5M_BAR_SPACING = 7; // When 5m bars are squeezed this tight, switch to 15m
-  const SWITCH_TO_1H_BAR_SPACING = 8; // When 15m bars are squeezed this tight, switch to 1h
-  const SWITCH_TO_4H_BAR_SPACING = 8; // When 1h bars are squeezed this tight, switch to 4h
-  const SWITCH_FROM_4H_BAR_SPACING = 32; // When 4h bars are spread this wide, switch to 1h
-  const SWITCH_TO_12H_BAR_SPACING = 4; // When 4h bars are squeezed this tight, switch to 12h
-  const SWITCH_FROM_12H_BAR_SPACING = 24; // When 12h bars are spread this wide, switch to 4h (3x factor)
 
   // Format prices
   const formatPrice = (price: number): string => {
@@ -479,58 +470,58 @@ const MarketDataChart: React.FC<MarketDataChartProps> = ({
       }
 
       // 12h → 4h (zooming in)
-      if (currentTf === '12h' && barSpacing > SWITCH_FROM_12H_BAR_SPACING) {
+      if (currentTf === '12h' && barSpacing > TIMEFRAME_SWITCH_THRESHOLDS['12h'].zoomIn) {
         console.log(
-          `[SWITCH] 12h bar spacing ${barSpacing} > ${SWITCH_FROM_12H_BAR_SPACING} → switching to 4h`
+          `[SWITCH] 12h bar spacing ${barSpacing} > ${TIMEFRAME_SWITCH_THRESHOLDS['12h'].zoomIn} → switching to 4h`
         );
         switchTimeframe('4h');
       }
       // 4h → 12h (zooming out)
-      else if (currentTf === '4h' && barSpacing < SWITCH_TO_12H_BAR_SPACING) {
+      else if (currentTf === '4h' && barSpacing < TIMEFRAME_SWITCH_THRESHOLDS['4h'].zoomOut) {
         console.log(
-          `[SWITCH] 4h bar spacing ${barSpacing} < ${SWITCH_TO_12H_BAR_SPACING} → switching to 12h`
+          `[SWITCH] 4h bar spacing ${barSpacing} < ${TIMEFRAME_SWITCH_THRESHOLDS['4h'].zoomOut} → switching to 12h`
         );
         switchTimeframe('12h');
       }
       // 4h → 1h (zooming in)
-      else if (currentTf === '4h' && barSpacing > SWITCH_FROM_4H_BAR_SPACING) {
+      else if (currentTf === '4h' && barSpacing > TIMEFRAME_SWITCH_THRESHOLDS['4h'].zoomIn) {
         console.log(
-          `[SWITCH] 4h bar spacing ${barSpacing} > ${SWITCH_FROM_4H_BAR_SPACING} → switching to 1h`
+          `[SWITCH] 4h bar spacing ${barSpacing} > ${TIMEFRAME_SWITCH_THRESHOLDS['4h'].zoomIn} → switching to 1h`
         );
         switchTimeframe('1h');
       }
       // 1h → 4h (zooming out)
-      else if (currentTf === '1h' && barSpacing < SWITCH_TO_4H_BAR_SPACING) {
+      else if (currentTf === '1h' && barSpacing < TIMEFRAME_SWITCH_THRESHOLDS['1h'].zoomOut) {
         console.log(
-          `[SWITCH] 1h bar spacing ${barSpacing} < ${SWITCH_TO_4H_BAR_SPACING} → switching to 4h`
+          `[SWITCH] 1h bar spacing ${barSpacing} < ${TIMEFRAME_SWITCH_THRESHOLDS['1h'].zoomOut} → switching to 4h`
         );
         switchTimeframe('4h');
       }
       // 1h → 15m (zooming in)
-      else if (currentTf === '1h' && barSpacing > SWITCH_TO_15M_BAR_SPACING) {
+      else if (currentTf === '1h' && barSpacing > TIMEFRAME_SWITCH_THRESHOLDS['1h'].zoomIn) {
         console.log(
-          `[SWITCH] 1h bar spacing ${barSpacing} > ${SWITCH_TO_15M_BAR_SPACING} → switching to 15m`
+          `[SWITCH] 1h bar spacing ${barSpacing} > ${TIMEFRAME_SWITCH_THRESHOLDS['1h'].zoomIn} → switching to 15m`
         );
         switchTimeframe('15m');
       }
       // 15m → 1h (zooming out)
-      else if (currentTf === '15m' && barSpacing < SWITCH_TO_1H_BAR_SPACING) {
+      else if (currentTf === '15m' && barSpacing < TIMEFRAME_SWITCH_THRESHOLDS['15m'].zoomOut) {
         console.log(
-          `[SWITCH] 15m bar spacing ${barSpacing} < ${SWITCH_TO_1H_BAR_SPACING} → switching to 1h`
+          `[SWITCH] 15m bar spacing ${barSpacing} < ${TIMEFRAME_SWITCH_THRESHOLDS['15m'].zoomOut} → switching to 1h`
         );
         switchTimeframe('1h');
       }
       // 15m → 5m (zooming in)
-      else if (currentTf === '15m' && barSpacing > SWITCH_TO_5M_BAR_SPACING) {
+      else if (currentTf === '15m' && barSpacing > TIMEFRAME_SWITCH_THRESHOLDS['15m'].zoomIn) {
         console.log(
-          `[SWITCH] 15m bar spacing ${barSpacing} > ${SWITCH_TO_5M_BAR_SPACING} → switching to 5m`
+          `[SWITCH] 15m bar spacing ${barSpacing} > ${TIMEFRAME_SWITCH_THRESHOLDS['15m'].zoomIn} → switching to 5m`
         );
         switchTimeframe('5m');
       }
       // 5m → 15m (zooming out)
-      else if (currentTf === '5m' && barSpacing < SWITCH_FROM_5M_BAR_SPACING) {
+      else if (currentTf === '5m' && barSpacing < TIMEFRAME_SWITCH_THRESHOLDS['5m'].zoomOut) {
         console.log(
-          `[SWITCH] 5m bar spacing ${barSpacing} < ${SWITCH_FROM_5M_BAR_SPACING} → switching to 15m`
+          `[SWITCH] 5m bar spacing ${barSpacing} < ${TIMEFRAME_SWITCH_THRESHOLDS['5m'].zoomOut} → switching to 15m`
         );
         switchTimeframe('15m');
       }

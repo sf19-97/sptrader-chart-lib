@@ -1,15 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useChartZoom } from './useChartZoom';
 import { IChartApi } from 'lightweight-charts';
-
-// Timeframe switching thresholds
-const THRESHOLDS = {
-  '5m': { zoomOut: 7, zoomIn: 35 },
-  '15m': { zoomOut: 8, zoomIn: 32 },
-  '1h': { zoomOut: 8, zoomIn: 32 },
-  '4h': { zoomOut: 4, zoomIn: 32 },
-  '12h': { zoomOut: 3, zoomIn: 24 },
-};
+import { TIMEFRAME_SWITCH_THRESHOLDS } from '../constants/timeframes';
 
 interface UseAutoTimeframeSwitchOptions {
   enabled?: boolean;
@@ -63,7 +55,7 @@ export function useAutoTimeframeSwitch(
 
   // Helper to determine suggested timeframe
   const getSuggestedTimeframe = useCallback((timeframe: string, spacing: number): string | null => {
-    const threshold = THRESHOLDS[timeframe as keyof typeof THRESHOLDS];
+    const threshold = TIMEFRAME_SWITCH_THRESHOLDS[timeframe as keyof typeof TIMEFRAME_SWITCH_THRESHOLDS];
     if (!threshold) return null;
 
     // Check zoom out conditions
